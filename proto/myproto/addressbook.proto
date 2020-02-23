@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package expcmake;
+
+import "myproto/address.proto";
+
+message NameQuerry {
+    string name = 1;
+}
+
+service AddressBook {
+    rpc GetAddress(NameQuerry) returns (Address) {}
+}

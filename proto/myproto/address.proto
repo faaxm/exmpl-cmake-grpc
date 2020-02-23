@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package expcmake;
+
+message Address {
+    string name     = 1;
+    string street   = 2;
+    string zip      = 3;
+    string city     = 4;
+    string country  = 5;
+}
+
