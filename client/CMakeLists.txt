@@ -1,6 +1,7 @@
 #
 # Dependencies
 #
+find_package(Threads)
 
 #
 # Sources
