@@ -1,6 +1,10 @@
+[![Build and Test](https://github.com/faaxm/testbuild-cmake-grpc/actions/workflows/build.yml/badge.svg)](https://github.com/faaxm/testbuild-cmake-grpc/actions/workflows/build.yml)
+
 # Protobuf/GRPC with CMake Example
 
-This is a basic example of a cmake project using protobuf together with grpc in c++.
+This is a basic example of a CMake project using Protobuf together with gRPC in C++.
+
+For some background info, have a look at this blog post explaining [how to structure gRPC projects with CMake](https://www.f-ax.de/dev/2020/11/08/grpc-plugin-cmake-support.html).
 
 ### gRPC Reflection
 Reflection can be enabled by linking agains `gRPC::grpc++_reflection`, enabling support for the `grpc_cli` tool.

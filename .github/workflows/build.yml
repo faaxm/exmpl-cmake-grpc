@@ -1,0 +1,87 @@
+name: Build and Test
+on:
+  push:
+  schedule:
+    - cron:  '0 0 * * 0' # weekly
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04]
+        build_type: ['Release']
+        dep_version: 
+          - abseil: tags/20210324.2
+            protobuf: tags/v3.17.3
+            grpc: tags/v1.39.0-pre1
+          - abseil: heads/master
+            protobuf: heads/master
+            grpc: heads/master
+        
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      
+      - name: Install Dependency Packages
+        run: |
+          sudo apt update
+          sudo apt install -y \
+          build-essential \
+          autoconf libtool pkg-config \
+          git cmake libc-ares-dev libre2-dev libssl-dev \
+          zlib1g-dev curl
+
+      - name: Install abseil
+        run: |
+          mkdir -p ${{ github.workspace }}/dep_build/abseil-cpp && cd ${{ github.workspace }}/dep_build/abseil-cpp
+          curl -sSL https://github.com/abseil/abseil-cpp/archive/refs/${{ matrix.dep_version.abseil }}.tar.gz | tar -xzf - --strip=1
+          mkdir build && cd build
+          cmake .. \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_TESTING=OFF
+          sudo make install
+          sudo ldconfig
+        
+      - name: Install protobuf
+        run: |
+          mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
+          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
+          mkdir build && cd build
+          cmake ../cmake \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DBUILD_SHARED_LIBS=ON \
+          -Dprotobuf_BUILD_TESTS=OFF
+          sudo make install
+          sudo ldconfig
+      
+      - name: Install gRPC
+        run: |
+          mkdir -p ${{ github.workspace }}/dep_build/grpc && cd ${{ github.workspace }}/dep_build/grpc
+          curl -sSL https://github.com/grpc/grpc/archive/refs/${{ matrix.dep_version.grpc }}.tar.gz| tar -xzf - --strip=1
+          mkdir build && cd build
+          cmake .. \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DgRPC_INSTALL=ON \
+          -DgRPC_BUILD_TESTS=OFF \
+          -DgRPC_ABSL_PROVIDER=package \
+          -DgRPC_CARES_PROVIDER=package \
+          -DgRPC_PROTOBUF_PROVIDER=package \
+          -DgRPC_PROTOBUF_PACKAGE_TYPE=CONFIG \
+          -DgRPC_RE2_PROVIDER=package \
+          -DgRPC_SSL_PROVIDER=package \
+          -DgRPC_ZLIB_PROVIDER=package
+          sudo make install
+          sudo ldconfig
+
+      - name: "Configure"
+        run: |
+          cd ${{ github.workspace }}
+          mkdir build
+          sudo cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} .
+      
+      - name: "Build"
+        run: sudo cmake --build build --config ${{ matrix.build_type }}
