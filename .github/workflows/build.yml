@@ -16,9 +16,9 @@ jobs:
           - abseil: tags/20210324.2
             protobuf: tags/v3.17.3
             grpc: tags/v1.39.0-pre1
-          - abseil: heads/master
-            protobuf: heads/master
-            grpc: heads/master
+          - abseil: latest
+            protobuf: latest
+            grpc: latest
         
     steps:
       - name: Check out repository code
