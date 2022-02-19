@@ -1,4 +1,6 @@
-[![Build and Test](https://github.com/faaxm/exmpl-cmake-grpc/actions/workflows/build.yml/badge.svg)](https://github.com/faaxm/exmpl-cmake-grpc/actions/workflows/build.yml)
+[![Build and Test - Fixed Dependencies](https://github.com/faaxm/exmpl-cmake-grpc/actions/workflows/build.yml/badge.svg)](https://github.com/faaxm/exmpl-cmake-grpc/actions/workflows/build.yml)
+
+[![Build and Test - Latest Dependencies](https://github.com/faaxm/exmpl-cmake-grpc/actions/workflows/build-latest-deps.yml/badge.svg)](https://github.com/faaxm/exmpl-cmake-grpc/actions/workflows/build-latest-deps.yml) (might indicate a bug in dependencies)
 
 # Protobuf/GRPC with CMake Example
 
