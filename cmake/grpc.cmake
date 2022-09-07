@@ -17,7 +17,7 @@
 # See cmake_externalproject/CMakeLists.txt for all-in-one cmake build
 # that automatically builds all the dependencies before building route_guide.
 
-# this file is customized version of https://github.com/grpc/grpc/blob/master/examples/cpp/cmake/common.cmake
+# this file is a customized version of https://github.com/grpc/grpc/blob/master/examples/cpp/cmake/common.cmake
 
 cmake_minimum_required(VERSION 3.5.1)
 

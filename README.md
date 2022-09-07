@@ -17,7 +17,7 @@ The following dependencies exist:
 There are two ways that can be used to build the code of this repository:
 
 ### Install dependencies manually
-As this project depends on gRPC and protobuf you can install gRPC and protobuf manually in a separate step.
+As this project depends on gRPC and protobuf you must install gRPC and protobuf manually in a separate step.
 Please refer to the corresponding documentation of gRPC/protobuf to do that.
 You can also find an example for installing the dependencies in this project's `.github/workflows` yaml files.
 Once you installed all dependencies run the following commands to build the project:
@@ -35,6 +35,7 @@ cmake -B build -DGRPC_FETCHCONTENT=TRUE -DGRPC_VERSION_TAG=v1.48.1 -DgRPC_BUILD_
 cmake --build build
 ```
 
+Note: When using this approach, it will probably improve compilation time to use a compile cache like https://ccache.dev/.
 
 ### gRPC Reflection
 Reflection can be enabled by linking against `gRPC::grpc++_reflection`, enabling support for the `grpc_cli` tool.

@@ -13,7 +13,7 @@ jobs:
         os: [ubuntu-latest, ubuntu-20.04]
         build_type: ['Release']
         dep_version: 
-          - abseil: tags/20210324.2
+          - abseil: tags/20220623.0
             protobuf: tags/v3.21.4
             grpc: tags/v1.47.1
         
