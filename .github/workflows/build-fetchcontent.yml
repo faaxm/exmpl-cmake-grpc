@@ -1,0 +1,26 @@
+name: Build and Test - Using FetchContent
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04]
+        build_type: ['Release']
+        dep_version: 
+          - grpc: v1.48.1
+        
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: "Configure"
+        run: |
+          cd ${{ github.workspace }}
+          sudo cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DGRPC_FETCHCONTENT=TRUE -DGRPC_VERSION_TAG=${{ matrix.dep_version.grpc}}
+      
+      - name: "Build"
+        run: sudo cmake --build build --config ${{ matrix.build_type }}
