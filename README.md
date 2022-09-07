@@ -31,7 +31,7 @@ If you do not want to install the gRPC dependency on your system, you can also p
 This will also pull protobuf as it is a dependency for gRPC.
 With this method you can simply use the following commands to build this project and its dependencies:
 ```
-cmake -B build -DGRPC_FETCHCONTENT=TRUE -DGRPC_VERSION_TAG=v1.48.1
+cmake -B build -DGRPC_FETCHCONTENT=TRUE -DGRPC_VERSION_TAG=v1.48.1 -DgRPC_BUILD_TESTS=OFF
 cmake --build build
 ```
 

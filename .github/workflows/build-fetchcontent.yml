@@ -10,17 +10,46 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-20.04]
         build_type: ['Release']
-        dep_version: 
-          - grpc: v1.48.1
-        
+        dep_version:
+          - grpc: v1.47.1
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
 
+      - name: Dependencies (Linux)
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y \
+              ccache \
+              build-essential \
+              autoconf libtool pkg-config libssl-dev
+
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-${{ matrix.build_type }}-${{ matrix.dep_version.grpc }}-cache
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.build_type }}-${{ matrix.dep_version.grpc }}-
+
+      - name: Prepare ccache
+        run: |
+          ccache --max-size=1.0G
+          ccache -V && ccache --show-stats && ccache --zero-stats
+
       - name: "Configure"
         run: |
-          cd ${{ github.workspace }}
-          sudo cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DGRPC_FETCHCONTENT=TRUE -DGRPC_VERSION_TAG=${{ matrix.dep_version.grpc}}
-      
+          cmake -B build \
+           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+           -DGRPC_FETCHCONTENT=TRUE \
+           -DGRPC_VERSION_TAG=${{ matrix.dep_version.grpc}} \
+           -DgRPC_BUILD_TESTS=OFF
+
       - name: "Build"
-        run: sudo cmake --build build --config ${{ matrix.build_type }} --parallel
+        run: cmake --build build --config ${{ matrix.build_type }}
+
+      - name: Show ccache stats
+        run: |
+          ccache -V && ccache --show-stats && ccache --zero-stats
