@@ -23,4 +23,4 @@ jobs:
           sudo cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DGRPC_FETCHCONTENT=TRUE -DGRPC_VERSION_TAG=${{ matrix.dep_version.grpc}}
       
       - name: "Build"
-        run: sudo cmake --build build --config ${{ matrix.build_type }}
+        run: sudo cmake --build build --config ${{ matrix.build_type }} --parallel
