@@ -43,6 +43,7 @@ if(GRPC_FETCHCONTENT)
     # For the purpose of testing, we override the tag used to the commit
     # that's currently under test.
     GIT_TAG        ${GRPC_TAG_VERSION}
+    GIT_SHALLOW    TRUE
   )
   set(FETCHCONTENT_QUIET OFF) # enables us to see the progress of FetchContent build
   FetchContent_MakeAvailable(grpc)
