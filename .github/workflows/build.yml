@@ -38,7 +38,8 @@ jobs:
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -DBUILD_TESTING=OFF
+          -DBUILD_TESTING=OFF \
+          -DABSL_PROPAGATE_CXX_STD=ON
           sudo make install
           sudo ldconfig
         
@@ -47,7 +48,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
           curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
           mkdir build && cd build
-          cmake ../cmake \
+          cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
           -Dprotobuf_BUILD_TESTS=OFF
