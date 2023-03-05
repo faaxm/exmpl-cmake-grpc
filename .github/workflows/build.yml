@@ -13,9 +13,9 @@ jobs:
         os: [ubuntu-latest, ubuntu-20.04]
         build_type: ['Release']
         dep_version: 
-          - abseil: tags/20220623.0
-            protobuf: tags/v3.21.4
-            grpc: tags/v1.47.1
+          - abseil: tags/20230125.1
+            protobuf: tags/v22.0
+            grpc: tags/v1.51.3
         
     steps:
       - name: Check out repository code
@@ -54,7 +54,7 @@ jobs:
       - name: Install protobuf
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
-          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
+          curl -sSL https://github.com/protocolbuffers/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
           mkdir build && cd build
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
