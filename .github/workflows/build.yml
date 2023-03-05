@@ -13,9 +13,9 @@ jobs:
         os: [ubuntu-latest, ubuntu-20.04]
         build_type: ['Release']
         dep_version: 
-          - abseil: tags/20210324.2
-            protobuf: tags/v3.17.3
-            grpc: tags/v1.39.0-pre1
+          - abseil: tags/20230125.1
+            protobuf: tags/v22.0
+            grpc: tags/v1.51.3
         
     steps:
       - name: Check out repository code
@@ -29,6 +29,14 @@ jobs:
           autoconf libtool pkg-config \
           git cmake libc-ares-dev libre2-dev libssl-dev \
           zlib1g-dev curl
+      
+      - name: Check versions
+        run: |
+          cmake --version
+          echo ""
+          cc --version
+          echo ""
+          c++ --version
 
       - name: Install abseil
         run: |
@@ -38,19 +46,21 @@ jobs:
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -DBUILD_TESTING=OFF
+          -DBUILD_TESTING=OFF \
+          -DABSL_PROPAGATE_CXX_STD=ON
           sudo make install
           sudo ldconfig
         
       - name: Install protobuf
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
-          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
+          curl -sSL https://github.com/protocolbuffers/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
           mkdir build && cd build
-          cmake ../cmake \
+          cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -Dprotobuf_BUILD_TESTS=OFF
+          -Dprotobuf_BUILD_TESTS=OFF \
+          -Dprotobuf_ABSL_PROVIDER=package
           sudo make install
           sudo ldconfig
       

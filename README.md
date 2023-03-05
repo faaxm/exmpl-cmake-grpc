@@ -9,7 +9,7 @@ This is a basic example of a CMake project using Protobuf together with gRPC in 
 For some background info, have a look at this blog post explaining [how to structure gRPC projects with CMake](https://www.f-ax.de/dev/2020/11/08/grpc-plugin-cmake-support.html).
 
 ### gRPC Reflection
-Reflection can be enabled by linking agains `gRPC::grpc++_reflection`, enabling support for the `grpc_cli` tool.
+Reflection can be enabled by linking against `gRPC::grpc++_reflection`, enabling support for the `grpc_cli` tool.
 
 If this project is linked with a static version of the grpc library from vcpkg
 the `-Wl,--whole-archive` flag has to be used. (together with `--allow-multiple-definition`). When linking dynamically,
