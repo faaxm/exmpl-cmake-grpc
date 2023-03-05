@@ -38,7 +38,8 @@ jobs:
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -DBUILD_TESTING=OFF
+          -DBUILD_TESTING=OFF \
+          -DABSL_PROPAGATE_CXX_STD=ON
           sudo make install
           sudo ldconfig
         
@@ -51,7 +52,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
           -Dprotobuf_BUILD_TESTS=OFF \
-          -DABSL_PROPAGATE_CXX_STD=ON
+          -Dprotobuf_ABSL_PROVIDER=package
           sudo make install
           sudo ldconfig
       
