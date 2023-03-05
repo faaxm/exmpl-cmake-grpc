@@ -35,7 +35,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/dep_build/abseil-cpp && cd ${{ github.workspace }}/dep_build/abseil-cpp
           curl -sSL https://github.com/abseil/abseil-cpp/archive/refs/${{ matrix.dep_version.abseil }}.tar.gz | tar -xzf - --strip=1
           mkdir build && cd build
-          cmake .. \
+          cmake -std=c++17 .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
           -DBUILD_TESTING=OFF \
@@ -48,7 +48,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
           curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
           mkdir build && cd build
-          cmake .. \
+          cmake -std=c++17 .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
           -Dprotobuf_BUILD_TESTS=OFF \
@@ -61,7 +61,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/dep_build/grpc && cd ${{ github.workspace }}/dep_build/grpc
           curl -sSL https://github.com/grpc/grpc/archive/refs/${{ matrix.dep_version.grpc }}.tar.gz| tar -xzf - --strip=1
           mkdir build && cd build
-          cmake .. \
+          cmake -std=c++17 .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=OFF \
           -DgRPC_INSTALL=ON \
