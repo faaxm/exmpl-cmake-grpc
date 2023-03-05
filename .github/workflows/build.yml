@@ -29,6 +29,14 @@ jobs:
           autoconf libtool pkg-config \
           git cmake libc-ares-dev libre2-dev libssl-dev \
           zlib1g-dev curl
+      
+      - name: Check versions
+        run: |
+          cmake --version
+          echo ""
+          cc --version
+          echo ""
+          c++ --version
 
       - name: Install abseil
         run: |
