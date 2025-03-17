@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04]
+        os: [ubuntu-20.04]
         build_type: ['Release']
         dep_version: 
           - abseil: tags/20210324.2
