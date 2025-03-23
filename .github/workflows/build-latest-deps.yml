@@ -46,12 +46,12 @@ jobs:
         id: cache
         with:
           path: |
-            /usr/local/lib/libabsl*
-            /usr/local/lib/libprotobuf*
-            /usr/local/lib/libgrpc*
-            /usr/local/include/absl
-            /usr/local/include/google
-            /usr/local/include/grpc
+            ${{ github.workspace }}/deps_install/lib/libabsl*
+            ${{ github.workspace }}/deps_install/lib/libprotobuf*
+            ${{ github.workspace }}/deps_install/lib/libgrpc*
+            ${{ github.workspace }}/deps_install/include/absl
+            ${{ github.workspace }}/deps_install/include/google
+            ${{ github.workspace }}/deps_install/include/grpc
           key: deps-${{ matrix.os }}-${{ steps.deps.outputs.dep_checksum }}
           restore-keys: |
             deps-${{ matrix.os }}-
@@ -74,9 +74,9 @@ jobs:
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -DBUILD_TESTING=OFF
-          sudo make install
-          sudo ldconfig
+          -DBUILD_TESTING=OFF \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/deps_install
+          make install
         
       - name: Install protobuf
         if: steps.cache.outputs.cache-hit != 'true'
@@ -87,9 +87,9 @@ jobs:
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -Dprotobuf_BUILD_TESTS=OFF
-          sudo make install
-          sudo ldconfig
+          -Dprotobuf_BUILD_TESTS=OFF \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/deps_install
+          make install
       
       - name: Install gRPC
         if: steps.cache.outputs.cache-hit != 'true'
@@ -108,15 +108,18 @@ jobs:
           -DgRPC_PROTOBUF_PACKAGE_TYPE=CONFIG \
           -DgRPC_RE2_PROVIDER=package \
           -DgRPC_SSL_PROVIDER=package \
-          -DgRPC_ZLIB_PROVIDER=package
-          sudo make install
-          sudo ldconfig
+          -DgRPC_ZLIB_PROVIDER=package \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/deps_install
+          make install
 
       - name: "Configure"
         run: |
           cd ${{ github.workspace }}
           mkdir build
-          sudo cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} .
+          cmake -B build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_PREFIX_PATH=${{ github.workspace }}/deps_install \
+          .
       
       - name: "Build"
-        run: sudo cmake --build build --config ${{ matrix.build_type }}
+        run: cmake --build build --config ${{ matrix.build_type }}
