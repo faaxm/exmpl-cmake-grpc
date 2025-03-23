@@ -21,6 +21,40 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+
+      - name: Download dependencies
+        id: deps
+        run: |
+          mkdir -p ${{ github.workspace }}/deps
+          cd ${{ github.workspace }}/deps
+          
+          # Download dependencies
+          curl -sSL https://github.com/abseil/abseil-cpp/archive/refs/${{ matrix.dep_version.abseil }}.tar.gz -o abseil.tar.gz
+          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz -o protobuf.tar.gz
+          curl -sSL https://github.com/grpc/grpc/archive/refs/${{ matrix.dep_version.grpc }}.tar.gz -o grpc.tar.gz
+          
+          # Compute checksums
+          ABSEIL_SHA=$(sha256sum abseil.tar.gz | cut -d' ' -f1)
+          PROTOBUF_SHA=$(sha256sum protobuf.tar.gz | cut -d' ' -f1)
+          GRPC_SHA=$(sha256sum grpc.tar.gz | cut -d' ' -f1)
+          
+          # Combine all checksums
+          echo "dep_checksum=$(echo "${ABSEIL_SHA}-${PROTOBUF_SHA}-${GRPC_SHA}" | sha256sum | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            /usr/local/lib/libabsl*
+            /usr/local/lib/libprotobuf*
+            /usr/local/lib/libgrpc*
+            /usr/local/include/absl
+            /usr/local/include/google
+            /usr/local/include/grpc
+          key: deps-${{ matrix.os }}-${{ steps.deps.outputs.dep_checksum }}
+          restore-keys: |
+            deps-${{ matrix.os }}-
       
       - name: Install Dependency Packages
         run: |
@@ -32,9 +66,10 @@ jobs:
           zlib1g-dev curl
 
       - name: Install abseil
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/abseil-cpp && cd ${{ github.workspace }}/dep_build/abseil-cpp
-          curl -sSL https://github.com/abseil/abseil-cpp/archive/refs/${{ matrix.dep_version.abseil }}.tar.gz | tar -xzf - --strip=1
+          tar -xzf ${{ github.workspace }}/deps/abseil.tar.gz --strip=1
           mkdir build && cd build
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
@@ -44,9 +79,10 @@ jobs:
           sudo ldconfig
         
       - name: Install protobuf
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
-          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
+          tar -xzf ${{ github.workspace }}/deps/protobuf.tar.gz --strip=1
           mkdir build && cd build
           cmake ../cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
@@ -56,9 +92,10 @@ jobs:
           sudo ldconfig
       
       - name: Install gRPC
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/grpc && cd ${{ github.workspace }}/dep_build/grpc
-          curl -sSL https://github.com/grpc/grpc/archive/refs/${{ matrix.dep_version.grpc }}.tar.gz| tar -xzf - --strip=1
+          tar -xzf ${{ github.workspace }}/deps/grpc.tar.gz --strip=1
           mkdir build && cd build
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
