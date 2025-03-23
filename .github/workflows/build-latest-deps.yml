@@ -53,8 +53,6 @@ jobs:
             ${{ github.workspace }}/deps_install/include/google
             ${{ github.workspace }}/deps_install/include/grpc
           key: deps-${{ matrix.os }}-${{ steps.deps.outputs.dep_checksum }}
-          restore-keys: |
-            deps-${{ matrix.os }}-
       
       - name: Install Dependency Packages
         run: |
