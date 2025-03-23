@@ -21,6 +21,33 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+
+      - name: Download dependencies
+        id: deps
+        run: |
+          mkdir -p ${{ github.workspace }}/deps
+          cd ${{ github.workspace }}/deps
+          
+          # Download dependencies
+          curl -sSL https://github.com/abseil/abseil-cpp/archive/refs/${{ matrix.dep_version.abseil }}.tar.gz -o abseil.tar.gz
+          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz -o protobuf.tar.gz
+          curl -sSL https://github.com/grpc/grpc/archive/refs/${{ matrix.dep_version.grpc }}.tar.gz -o grpc.tar.gz
+          
+          # Compute checksums
+          ABSEIL_SHA=$(sha256sum abseil.tar.gz | cut -d' ' -f1)
+          PROTOBUF_SHA=$(sha256sum protobuf.tar.gz | cut -d' ' -f1)
+          GRPC_SHA=$(sha256sum grpc.tar.gz | cut -d' ' -f1)
+          
+          # Combine all checksums
+          echo "dep_checksum=$(echo "${ABSEIL_SHA}-${PROTOBUF_SHA}-${GRPC_SHA}" | sha256sum | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}/deps_install
+          key: deps-${{ matrix.os }}-${{ steps.deps.outputs.dep_checksum }}
       
       - name: Install Dependency Packages
         run: |
@@ -32,33 +59,36 @@ jobs:
           zlib1g-dev curl
 
       - name: Install abseil
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/abseil-cpp && cd ${{ github.workspace }}/dep_build/abseil-cpp
-          curl -sSL https://github.com/abseil/abseil-cpp/archive/refs/${{ matrix.dep_version.abseil }}.tar.gz | tar -xzf - --strip=1
+          tar -xzf ${{ github.workspace }}/deps/abseil.tar.gz --strip=1
           mkdir build && cd build
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -DBUILD_TESTING=OFF
-          sudo make install
-          sudo ldconfig
+          -DBUILD_TESTING=OFF \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/deps_install
+          make install
         
       - name: Install protobuf
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
-          curl -sSL https://github.com/google/protobuf/archive/refs/${{ matrix.dep_version.protobuf }}.tar.gz | tar -xzf - --strip=1
+          tar -xzf ${{ github.workspace }}/deps/protobuf.tar.gz --strip=1
           mkdir build && cd build
           cmake ../cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
-          -Dprotobuf_BUILD_TESTS=OFF
-          sudo make install
-          sudo ldconfig
+          -Dprotobuf_BUILD_TESTS=OFF \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/deps_install
+          make install
       
       - name: Install gRPC
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/dep_build/grpc && cd ${{ github.workspace }}/dep_build/grpc
-          curl -sSL https://github.com/grpc/grpc/archive/refs/${{ matrix.dep_version.grpc }}.tar.gz| tar -xzf - --strip=1
+          tar -xzf ${{ github.workspace }}/deps/grpc.tar.gz --strip=1
           mkdir build && cd build
           cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
@@ -71,15 +101,21 @@ jobs:
           -DgRPC_PROTOBUF_PACKAGE_TYPE=CONFIG \
           -DgRPC_RE2_PROVIDER=package \
           -DgRPC_SSL_PROVIDER=package \
-          -DgRPC_ZLIB_PROVIDER=package
-          sudo make install
-          sudo ldconfig
+          -DgRPC_ZLIB_PROVIDER=package \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/deps_install
+          make install
 
       - name: "Configure"
         run: |
           cd ${{ github.workspace }}
           mkdir build
-          sudo cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} .
+          export LD_LIBRARY_PATH=${{ github.workspace }}/deps_install/lib:$LD_LIBRARY_PATH
+          cmake -B build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_PREFIX_PATH=${{ github.workspace }}/deps_install \
+          .
       
       - name: "Build"
-        run: sudo cmake --build build --config ${{ matrix.build_type }}
+        run: |
+          export LD_LIBRARY_PATH=${{ github.workspace }}/deps_install/lib:$LD_LIBRARY_PATH
+          cmake --build build --config ${{ matrix.build_type }}
