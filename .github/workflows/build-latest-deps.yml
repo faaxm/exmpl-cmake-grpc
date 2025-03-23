@@ -46,12 +46,7 @@ jobs:
         id: cache
         with:
           path: |
-            ${{ github.workspace }}/deps_install/lib/libabsl*
-            ${{ github.workspace }}/deps_install/lib/libprotobuf*
-            ${{ github.workspace }}/deps_install/lib/libgrpc*
-            ${{ github.workspace }}/deps_install/include/absl
-            ${{ github.workspace }}/deps_install/include/google
-            ${{ github.workspace }}/deps_install/include/grpc
+            ${{ github.workspace }}/deps_install
           key: deps-${{ matrix.os }}-${{ steps.deps.outputs.dep_checksum }}
       
       - name: Install Dependency Packages
@@ -114,10 +109,13 @@ jobs:
         run: |
           cd ${{ github.workspace }}
           mkdir build
+          export LD_LIBRARY_PATH=${{ github.workspace }}/deps_install/lib:$LD_LIBRARY_PATH
           cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_PREFIX_PATH=${{ github.workspace }}/deps_install \
           .
       
       - name: "Build"
-        run: cmake --build build --config ${{ matrix.build_type }}
+        run: |
+          export LD_LIBRARY_PATH=${{ github.workspace }}/deps_install/lib:$LD_LIBRARY_PATH
+          cmake --build build --config ${{ matrix.build_type }}
