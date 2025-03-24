@@ -11,12 +11,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-24.04]
         build_type: ['Release']
         dep_version: 
-          - abseil: tags/20210324.2
-            protobuf: tags/v3.17.3
-            grpc: tags/v1.39.0-pre1
+          - abseil: tags/20250127.1
+            protobuf: tags/v30.1
+            grpc: tags/v1.71.0
         
     steps:
       - name: Check out repository code
@@ -77,7 +77,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/dep_build/protobuf && cd ${{ github.workspace }}/dep_build/protobuf
           tar -xzf ${{ github.workspace }}/deps/protobuf.tar.gz --strip=1
           mkdir build && cd build
-          cmake ../cmake \
+          cmake .. \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_SHARED_LIBS=ON \
           -Dprotobuf_BUILD_TESTS=OFF \
